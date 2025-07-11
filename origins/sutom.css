@@ -1,0 +1,100 @@
+:root {
+  --body-padding: 50px;
+
+  --cell-size: 6vw;
+  --cell-font-size: calc(var(--cell-size) - 1.5vw);
+  --cell-padding: 4px;
+
+  --color-normal: #0077c7;
+  --color-not-found: #707070;
+  --color-found: #e7002a;
+  --color-wrong-place: #ffbd00;
+  --color-background: #2b2b2b;
+
+  --keyboard-margin: 32px;
+  --keyboard-letter-margin: 4px;
+  --keyboard-letter-color: white;
+  --keyboard-letter-font-size: 18px;
+  --keyboard-letter-size: 45px;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--body-padding);
+
+  background-color: var(--color-background);
+  font-family: 'Open Sans', sans-serif;
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-normal);
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+
+  padding: var(--cell-padding);
+  
+  color: white;
+  border: 1px solid white;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  font-size: var(--cell-font-size);
+}
+
+.found {
+  background-color: var(--color-found);
+}
+
+.not-found {
+  background-color: var(--color-not-found);
+}
+
+.wrong {
+  background-color: var(--color-wrong-place);
+}
+
+.picture {
+  width: 50%;
+  margin: auto;
+}
+
+.keyboard {
+  margin-top: var(--keyboard-margin);
+  width: 500px;
+}
+
+.keyboard-line {
+  display: flex;
+  justify-content: space-between;
+}
+
+.keyboard-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  margin: var(--keyboard-letter-margin);
+
+  font-size: var(--keyboard-letter-font-size);
+  height: var(--keyboard-letter-size);
+  color: var(--keyboard-letter-color);
+  border: 1px solid var(--keyboard-letter-color);
+  border-radius: 8px;
+
+  user-select: none;
+  cursor: pointer;
+}
+
+.keyboard-letter:active {
+  color: var(--color-background);
+  border-color: var(--color-background);
+  background-color: var(--keyboard-letter-color);
+}
