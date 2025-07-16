@@ -36,20 +36,20 @@ const InlineDifficultySelectorComponent = ({
           >
             <div
               onClick={() => onDifficultySelect(level as Difficulty)}
-              className={`w-full h-16 flex items-center px-6 cursor-pointer ${
+              className={`w-full min-h-16 flex items-center px-4 sm:px-6 cursor-pointer ${
                 isLoadingWord ? 'cursor-not-allowed opacity-50' : ''
               }`}
             >
-              <div className="flex-1 flex items-center space-x-4">
-                <span className={`font-bold text-lg ${difficultyLevel.color}`}>
+              <div className="flex-1">
+                <div className={`font-bold text-base sm:text-lg ${difficultyLevel.color} mb-1`}>
                   {difficultyLevel.name}
-                </span>
-                <span className="text-gray-400 text-sm">
+                </div>
+                <div className="text-gray-400 text-xs sm:text-sm leading-tight">
                   {difficultyLevel.description}
-                </span>
+                </div>
               </div>
               {isSelected && (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 sm:space-x-3 ml-2 sm:ml-0">
                   <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"/>
                   <button
                     onClick={(e) => {
@@ -57,7 +57,7 @@ const InlineDifficultySelectorComponent = ({
                       onStartNewGame();
                     }}
                     disabled={isLoadingWord}
-                    className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                    className={`px-3 sm:px-6 py-2 rounded-lg font-medium text-sm sm:text-base transition-all duration-300 ${
                       isLoadingWord 
                         ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
                         : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg'
