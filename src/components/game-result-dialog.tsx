@@ -51,7 +51,7 @@ export const GameResultDialog = ({
   onReturnToDifficulty,
   isLoadingWord,
   getGameStats = defaultGetGameStats,
-  // endGameData,
+  endGameData,
 }: GameResultDialogProps) => {
   const [gameStats, setGameStats] = useState<FullGameStats['overall'] | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
@@ -74,6 +74,11 @@ export const GameResultDialog = ({
     maxAttempts: 6,
     successRate: gameStatus.isWon ? 100 : 0
   }), [gameState.currentRow, gameStatus.isWon]);
+
+  // Obtenir le mot correct depuis endGameData ou gameState
+  const correctWord = useMemo(() => {
+    return endGameData?.wordInfo?.word || gameState.targetWord;
+  }, [endGameData?.wordInfo?.word, gameState.targetWord]);
 
   // Récupération des statistiques lors de l'ouverture du dialogue
   useEffect(() => {
@@ -131,14 +136,14 @@ export const GameResultDialog = ({
                 <span className="inline-flex items-center justify-center gap-2">
                   <span>Mot trouvé avec succès :</span>
                   <span className="font-mono font-bold text-base px-2 py-0.5 rounded bg-green-500/10 text-green-300 border border-green-500/20">
-                    {gameState.targetWord}
+                    {correctWord}
                   </span>
                 </span>
               ) : (
                 <span className="inline-flex items-center justify-center gap-2">
                   <span>La bonne réponse était :</span>
                   <span className="font-mono font-bold text-base px-2 py-0.5 rounded bg-red-500/10 text-red-300 border border-red-500/20">
-                    {gameState.targetWord}
+                    {correctWord}
                   </span>
                 </span>
               )}
@@ -164,11 +169,11 @@ export const GameResultDialog = ({
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
                   <div className="text-gray-400 text-sm mb-1">Mot</div>
-                  <div className="text-lg font-mono font-semibold text-white">{gameState.targetWord}</div>
+                  <div className="text-lg font-mono font-semibold text-white">{correctWord}</div>
                 </div>
                 <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
                   <div className="text-gray-400 text-sm mb-1">Longueur</div>
-                  <div className="text-lg font-mono font-semibold text-blue-400">{gameState.targetWord.length} lettres</div>
+                  <div className="text-lg font-mono font-semibold text-blue-400">{correctWord.length} lettres</div>
                 </div>
               </div>
             </div>

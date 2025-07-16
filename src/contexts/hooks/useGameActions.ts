@@ -230,8 +230,14 @@ export const useGameActions = ({
                 if (apiIsWon) {
                   playAudio(AUDIO_FILES.win);
                 }
+                // 游戏结束时不需要更新currentRow
               } else {
                 newCurrentRow = prev.currentRow + 1;
+                // 检查是否已达到最大尝试次数（6次）
+                if (newCurrentRow >= 6) {
+                  newGameStatus = 'lost';
+                  // 注意：这里不设置isCompleted为true，因为API会在下一次调用时返回isCompleted
+                }
               }
               
               return {
@@ -311,6 +317,14 @@ export const useGameActions = ({
                 } else {
                   void handleGameComplete(apiIsWon, response.data.attempts);
                 }
+              }
+            } else {
+              // 检查是否在非API完成状态下达到了最大尝试次数
+              const currentAttempt = gameState.currentRow + 1;
+              if (currentAttempt >= 6) {
+                // 达到最大尝试次数，游戏失败
+                console.log('🎮 达到最大尝试次数，游戏失败');
+                void handleGameComplete(false, 6);
               }
             }
           } else {
