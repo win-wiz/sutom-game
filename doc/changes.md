@@ -356,6 +356,196 @@ export const playAudio = (audioFile: string): void => {
 - 部署指南
 - 开发指南
 
+## 🔄 GameContext 组件重构 (2024-12-19)
+
+### 重构背景
+原始的 GameContext 组件包含了过多的功能和逻辑，违反了单一职责原则，导致代码难以维护和测试。
+
+### 重构目标
+- 按功能拆分组件，实现"一个功能一个组件"的原则
+- 提高代码的可维护性和可复用性
+- 保持所有原有功能和流程不变
+
+### 原始结构问题
+```typescript
+// GameContext.tsx (重构前)
+// 900+ 行代码，包含所有功能：
+- 游戏状态管理 (gameState, sessionId, gameMode 等)
+- 游戏操作逻辑 (addLetter, removeLetter, checkWord 等)
+- 游戏管理功能 (startNewGame, restartGame, 模式切换等)
+- 游戏完成处理 (handleGameComplete, 数据统计等)
+- Wordle 算法实现 (computeLetterStates)
+- API 调用和错误处理
+- 本地存储管理
+```
+
+### 重构后的模块化结构
+
+#### 1. useGameState Hook
+**文件**: `src/contexts/hooks/useGameState.ts`
+**职责**: 游戏基础状态管理
+```typescript
+// 管理的状态
+- gameState: GameState | null
+- sessionId: string | null
+- gameMode: GameMode
+- selectedDifficulty: Difficulty | null
+- lastPlayedDifficulty: Difficulty | null
+- isDailyChallenge: boolean
+- endGameData: EndGameData | null
+- gameCompleteProcessing: boolean
+
+// 提供的功能
+- createInitialGameStateWithDifficulty()
+- resetGameState()
+- setEndGameDataWithRef()
+```
+
+#### 2. useGameActions Hook
+**文件**: `src/contexts/hooks/useGameActions.ts`
+**职责**: 游戏核心操作逻辑
+```typescript
+// 核心功能
+- computeLetterStates() // Wordle 双色分配算法
+- addLetter() // 添加字母
+- removeLetter() // 删除字母
+- checkWord() // 单词验证（支持 API 和本地模式）
+- handleKeyInput() // 键盘输入处理
+- handleVirtualKeyboard() // 虚拟键盘处理
+- closeValidationResult() // 关闭验证结果
+
+// 状态管理
+- isChecking: boolean
+- isValidating: boolean
+- validationResult: DictionaryValidationResult | null
+```
+
+#### 3. useGameManager Hook
+**文件**: `src/contexts/hooks/useGameManager.ts`
+**职责**: 游戏管理和生命周期
+```typescript
+// 游戏管理功能
+- returnToMainMenu() // 返回主菜单
+- handleDifficultySelect() // 选择难度
+- startNewGame() // 开始新游戏
+- startDailyChallenge() // 开始每日挑战
+- quickStart() // 快速开始
+- restartGame() // 重新开始
+- returnToDifficultySelection() // 返回难度选择
+- getGameStats() // 获取游戏统计
+
+// 状态管理
+- isLoadingWord: boolean
+
+// 初始化逻辑
+- 从 localStorage 加载难度
+- 从 URL 初始化单词
+```
+
+#### 4. useGameCompletion Hook
+**文件**: `src/contexts/hooks/useGameCompletion.ts`
+**职责**: 游戏完成处理
+```typescript
+// 游戏完成逻辑
+- handleGameComplete() // 处理游戏结束
+- 生成 EndGameData（API 模式和本地模式）
+- API 调用失败的降级处理
+- 每日挑战状态更新
+
+// 数据处理
+- API 模式：调用 endGame 接口获取统计数据
+- 本地模式：生成基本的 endGameData
+- 错误处理：API 失败时的 fallback 逻辑
+```
+
+#### 5. 统一导出
+**文件**: `src/contexts/hooks/index.ts`
+```typescript
+export { useGameState } from './useGameState';
+export { useGameActions } from './useGameActions';
+export { useGameManager } from './useGameManager';
+export { useGameCompletion } from './useGameCompletion';
+```
+
+### 重构后的 GameContext
+**文件**: `src/contexts/GameContext.tsx` (重构后)
+```typescript
+// 150 行代码，专注于组合各个 Hook
+export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // 使用各个功能 Hook
+  const gameStateHook = useGameState();
+  const { handleGameComplete } = useGameCompletion({...});
+  const gameActionsHook = useGameActions({...});
+  const gameManagerHook = useGameManager({...});
+  
+  // 使用 useMemo 优化性能
+  const contextValue: GameContextType = useMemo(() => ({...}), [...]);
+  
+  return (
+    <GameContext.Provider value={contextValue}>
+      {children}
+    </GameContext.Provider>
+  );
+};
+```
+
+### 重构优势
+
+#### 📦 模块化设计
+- **单一职责**: 每个 Hook 专注于特定功能领域
+- **清晰边界**: 功能边界明确，职责分离
+- **易于理解**: 代码结构更清晰，便于阅读和理解
+
+#### 🔧 可维护性提升
+- **独立测试**: 每个 Hook 可以独立进行单元测试
+- **局部修改**: 修改特定功能时只需关注对应的 Hook
+- **减少耦合**: 降低了组件间的耦合度
+
+#### 🚀 性能优化
+- **精确依赖**: useMemo 和 useCallback 的依赖更加精确
+- **减少重渲染**: 状态变化影响范围更小
+- **代码分割**: 支持更好的代码分割和懒加载
+
+#### 🔄 可复用性
+- **Hook 复用**: 各个 Hook 可以在其他组件中复用
+- **组合灵活**: 可以根据需要选择性使用某些 Hook
+- **扩展容易**: 新增功能时可以创建新的 Hook
+
+### 重构对比
+
+| 方面 | 重构前 | 重构后 | 改进 |
+|------|--------|--------|------|
+| 代码行数 | 900+ 行 | 150 行 (主文件) | ✅ 大幅减少 |
+| 功能模块 | 1 个大文件 | 4 个专用 Hook | ✅ 模块化 |
+| 单一职责 | ❌ 违反 | ✅ 遵循 | ✅ 架构改进 |
+| 可测试性 | ❌ 困难 | ✅ 容易 | ✅ 质量提升 |
+| 可维护性 | ❌ 复杂 | ✅ 简单 | ✅ 开发效率 |
+| 性能优化 | ❌ 粗粒度 | ✅ 精细化 | ✅ 用户体验 |
+
+### 兼容性保证
+- ✅ **接口不变**: GameContext 的对外接口完全保持不变
+- ✅ **功能完整**: 所有原有功能和流程都得到保留
+- ✅ **行为一致**: 游戏逻辑和用户体验完全一致
+- ✅ **无破坏性**: 对现有组件无任何影响
+
+### 文件结构变化
+```
+src/contexts/
+├── GameContext.tsx          # 重构：主要组合逻辑
+└── hooks/                   # 新增：功能模块目录
+    ├── index.ts            # 新增：统一导出
+    ├── useGameState.ts     # 新增：状态管理
+    ├── useGameActions.ts   # 新增：游戏操作
+    ├── useGameManager.ts   # 新增：游戏管理
+    └── useGameCompletion.ts # 新增：完成处理
+```
+
+### 后续维护建议
+1. **功能扩展**: 新增功能时优先考虑创建新的专用 Hook
+2. **测试覆盖**: 为每个 Hook 编写独立的单元测试
+3. **文档更新**: 及时更新各个 Hook 的使用文档
+4. **性能监控**: 关注重构后的性能表现
+
 ## 🎯 总结
 
 本次重构实现了：
@@ -367,5 +557,6 @@ export const playAudio = (audioFile: string): void => {
 - ✅ 性能优化
 - ✅ 可维护性提升
 - ✅ 扩展性增强
+- ✅ **模块化重构** (新增)
 
-项目从传统的 HTML/CSS/JavaScript 成功迁移到现代的 T3 Stack 架构，在保持所有原有功能的同时，大大提升了代码质量、可维护性和开发体验。 
+项目从传统的 HTML/CSS/JavaScript 成功迁移到现代的 T3 Stack 架构，并通过 GameContext 组件的模块化重构，进一步提升了代码质量、可维护性和开发体验。

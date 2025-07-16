@@ -157,6 +157,7 @@ export interface WordInfo {
   origin?: string;
   category?: string;
   pronunciation?: string;
+  [key: string]: unknown;
 }
 
 // 单词统计信息 (从 /guess 接口返回的 wordStats)
@@ -171,6 +172,7 @@ export interface WordStats {
   sampleSize?: number;
   lastPlayedAt?: string;          // 本地模式字段
   lastPlayed?: string;            // API返回的字段名
+  [key: string]: unknown;
 }
 
 // 游戏结束响应数据

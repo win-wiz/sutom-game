@@ -1,7 +1,11 @@
 'use client';
 
+import { useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { HelpCircle } from 'lucide-react';
 import { useGame } from '@/contexts/GameContext';
+import Image from "next/image";
+import logo from "@/../public/favicon.png";
 
 const Header = () => {
   const { 
@@ -13,42 +17,82 @@ const Header = () => {
     returnToDifficultySelection
   } = useGame();
 
-  // 调试输出
-  console.log('Header render:', { gameMode, gameState: !!gameState });
+  // Mémoriser les informations de difficulté pour éviter les recalculs
+  const difficultyInfo = useMemo(() => {
+    if (!gameState || isDailyChallenge || !gameState.difficulty) return null;
+    
+    const difficultyMap = {
+      easy: { label: 'Débutant', className: 'bg-green-500/20 text-green-400' },
+      medium: { label: 'Intermédiaire', className: 'bg-yellow-500/20 text-yellow-400' },
+      hard: { label: 'Avancé', className: 'bg-red-500/20 text-red-400' }
+    } as const;
+    
+    return difficultyMap[gameState.difficulty] || null;
+  }, [gameState?.difficulty, isDailyChallenge]);
+
+  // Mémoriser les textes des boutons
+  const buttonTexts = useMemo(() => ({
+    restart: isLoadingWord ? 'Chargement...' : 'Recommencer',
+    return: isDailyChallenge ? 'Retour au défi' : 'Menu principal'
+  }), [isLoadingWord, isDailyChallenge]);
+
+  // Optimiser les gestionnaires d'événements avec useCallback
+  const handleRestart = useCallback(() => {
+    if (!isLoadingWord) {
+      restartGame();
+    }
+  }, [isLoadingWord, restartGame]);
+
+  const handleReturn = useCallback(() => {
+    returnToDifficultySelection();
+  }, [returnToDifficultySelection]);
+
+  // 滚动到帮助中心的函数
+  const scrollToHelpCenter = useCallback(() => {
+    const helpElement = document.querySelector('[data-help-center]');
+    if (helpElement) {
+      helpElement.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, []);
 
   return (
     <header className="sticky top-0 z-10 w-full border-b border-gray-700/50 bg-gray-800">
       <div className="container mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-white">Sutom</span>
+            <Image 
+              src={logo} 
+              alt="logo" 
+              width={32} 
+              height={32} 
+              className="opacity-90 md:w-8 md:h-8" 
+            />
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">Sutom</span>
           </Link>
 
-          {/* 游戏信息 - 只在游戏模式下显示 */}
+          {/* Informations du jeu - affiché uniquement en mode jeu */}
           {gameMode === 'playing' && gameState && (
             <div className="flex items-center space-x-4 ml-6">
               {isDailyChallenge ? (
                 <div className="flex items-center space-x-2">
                   <span className="text-purple-400">📅</span>
-                  <span className="text-purple-400 font-medium">每日挑战</span>
+                  <span className="text-purple-400 font-medium">Défi quotidien</span>
                 </div>
               ) : (
                 <>
-                  <div className={`px-2 py-1 rounded text-sm font-medium
-                    ${gameState.difficulty === 'easy' 
-                      ? 'bg-green-500/20 text-green-400'
-                      : gameState.difficulty === 'medium'
-                        ? 'bg-yellow-500/20 text-yellow-400'
-                        : 'bg-red-500/20 text-red-400'}`}
-                  >
-                    {gameState.difficulty === 'easy' ? '初级' : 
-                     gameState.difficulty === 'medium' ? '中级' : '高级'}
+                  {difficultyInfo && (
+                    <div className={`px-2 py-1 rounded text-sm font-medium ${difficultyInfo.className}`}>
+                      {difficultyInfo.label}
+                    </div>
+                  )}
+                  <div className="text-gray-400 text-sm">
+                    Longueur: {gameState.targetWord.length}
                   </div>
                   <div className="text-gray-400 text-sm">
-                    长度: {gameState.targetWord.length}
-                  </div>
-                  <div className="text-gray-400 text-sm">
-                    进度: {gameState.currentRow}/6
+                    Progrès: {gameState.currentRow}/6
                   </div>
                 </>
               )}
@@ -56,31 +100,46 @@ const Header = () => {
           )}
         </div>
 
-        {/* 游戏控制按钮 - 只在游戏模式下显示 */}
-        {gameMode === 'playing' && gameState && (
-          <div className="flex items-center space-x-3">
+        {/* Boutons de contrôle - différents selon le mode */}
+        <div className="flex items-center space-x-3">
+          {/* Icône d'aide - affiché uniquement en mode main-menu */}
+          {gameMode === 'main-menu' && (
             <button
-              onClick={restartGame}
-              disabled={isLoadingWord}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-300
-                ${isLoadingWord 
-                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+              onClick={scrollToHelpCenter}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors duration-300"
+              aria-label="Aller au centre d'aide"
+              title="Centre d'aide"
             >
-              {isLoadingWord ? '加载中...' : '重新开始'}
+              <HelpCircle className="w-5 h-5" />
             </button>
-            
-            <button
-              onClick={returnToDifficultySelection}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-300"
-            >
-              {isDailyChallenge ? '返回挑战' : '返回主菜单'}
-            </button>
-          </div>
-        )}
+          )}
+          
+          {/* Boutons de contrôle du jeu - affiché uniquement en mode jeu */}
+          {gameMode === 'playing' && gameState && (
+            <>
+              <button
+                onClick={handleRestart}
+                disabled={isLoadingWord}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-300
+                  ${isLoadingWord 
+                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+              >
+                {buttonTexts.restart}
+              </button>
+              
+              <button
+                onClick={handleReturn}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-300"
+              >
+                {buttonTexts.return}
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
 };
 
-export default Header; 
+export default Header;

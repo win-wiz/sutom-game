@@ -45,8 +45,6 @@ export interface KeyboardLetterProps {
 
 export interface GameGridProps {
   rows: GameRow[];
-  currentRow: number;
-  wordLength: number;
 }
 
 export interface VirtualKeyboardProps {

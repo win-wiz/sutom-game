@@ -1,4 +1,4 @@
-import { type GameState, type GameCell, type LetterState, type Difficulty, AUDIO_FILES } from '@/types/game';
+import { type GameState, type GameCell, type LetterState, type Difficulty } from '@/types/game';
 
 export const DEFAULT_WORD = 'cacophonie';
 
@@ -29,12 +29,12 @@ export const createInitialGameState = (word: string): GameState => {
 export const createInitialGameStateWithDifficulty = (word: string, difficulty: Difficulty | null): GameState => {
   const lettersCount: Record<string, number> = {};
   
-  // 统计目标单词中每个字母的出现次数
+  // Compter le nombre d'occurrences de chaque lettre dans le mot cible
   for (const letter of word) {
     lettersCount[letter] = (lettersCount[letter] ?? 0) + 1;
   }
   
-  // 创建初始行，第一个字母已显示
+  // Créer la ligne initiale, la première lettre est déjà affichée
   const initialRow = {
     cells: word.split('').map((letter, index) => 
       createEmptyCell(index === 0 ? letter : '.')
@@ -62,12 +62,12 @@ export const checkLetter = (
   lettersFound: Record<string, number>,
   lettersCount: Record<string, number>
 ): LetterState => {
-  // 如果字母位置正确
+  // Si la position de la lettre est correcte
   if (cellLetter === targetLetter) {
     return 'found';
   }
   
-  // 如果字母存在于单词中但位置错误
+  // Si la lettre existe dans le mot mais à la mauvaise position
   if (
     targetWord.includes(cellLetter) &&
     (lettersFound[cellLetter] ?? 0) <= (lettersCount[cellLetter] ?? 0)
@@ -75,7 +75,7 @@ export const checkLetter = (
     return 'wrong';
   }
   
-  // 字母不存在于单词中
+  // La lettre n'existe pas dans le mot
   return 'not-found';
 };
 
@@ -108,4 +108,4 @@ export const isRowComplete = (row: GameCell[]): boolean => {
 
 export const isGameWon = (row: GameCell[], targetWord: string): boolean => {
   return row.map(cell => cell.letter).join('') === targetWord;
-}; 
+};

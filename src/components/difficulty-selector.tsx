@@ -1,6 +1,6 @@
 'use client';
 
-import { type DifficultyInfo, type Difficulty } from '@/types/game';
+import { type Difficulty } from '@/types/game';
 import { wordService } from '@/lib/wordService';
 
 interface DifficultySelectorProps {
@@ -22,9 +22,9 @@ export const DifficultySelector = ({
   return (
     <div className="flex flex-col items-center space-y-8 max-w-2xl mx-auto">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-white mb-4">选择游戏难度</h2>
+        <h2 className="text-3xl font-bold text-white mb-4">Choisir la difficulté du jeu</h2>
         <p className="text-gray-300 mb-8">
-          选择适合您的难度级别开始游戏
+          Choisissez le niveau de difficulté qui vous convient pour commencer le jeu
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export const DifficultySelector = ({
                 }
               `}
             >
-              {/* 选中指示器 */}
+              {/* Indicateur de sélection */}
               {isSelected && (
                 <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -62,19 +62,19 @@ export const DifficultySelector = ({
                   {level.description}
                 </p>
                 
-                {/* 统计信息 */}
+                {/* Informations statistiques */}
                 <div className="bg-gray-900/50 rounded-lg p-3 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">词汇数量:</span>
+                    <span className="text-gray-400">Nombre de mots:</span>
                     <span className="text-white font-medium">{stat.count}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">平均长度:</span>
-                    <span className="text-white font-medium">{stat.avgLength} 字母</span>
+                    <span className="text-gray-400">Longueur moyenne:</span>
+                    <span className="text-white font-medium">{stat.avgLength} lettres</span>
                   </div>
                 </div>
 
-                {/* 难度图标 */}
+                {/* Icônes de difficulté */}
                 <div className="flex justify-center mt-4">
                   {Array.from({ length: 3 }, (_, i) => (
                     <div
@@ -93,12 +93,12 @@ export const DifficultySelector = ({
         })}
       </div>
 
-      {/* 开始游戏按钮 */}
+      {/* Bouton de démarrage du jeu */}
       <div className="flex flex-col items-center space-y-4">
         {/* {selectedDifficulty && (
           <div className="text-center">
             <p className="text-gray-300 mb-4">
-              已选择: <span className={`font-bold ${difficultyLevels.find(l => l.level === selectedDifficulty)?.color}`}>
+              Sélectionné: <span className={`font-bold ${difficultyLevels.find(l => l.level === selectedDifficulty)?.color}`}>
                 {difficultyLevels.find(l => l.level === selectedDifficulty)?.name}
               </span>
             </p>
@@ -119,18 +119,18 @@ export const DifficultySelector = ({
           {isLoading ? (
             <div className="flex items-center space-x-2">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>加载中...</span>
+              <span>Chargement...</span>
             </div>
           ) : (
-            '开始游戏'
+            'Commencer le jeu'
           )}
         </button>
       </div>
 
-      {/* 帮助信息 */}
+      {/* Informations d'aide */}
       <div className="text-center text-sm text-gray-400 max-w-lg">
-        <p>💡 提示: 您可以随时返回更改难度级别</p>
+        <p>💡 Conseil: Vous pouvez revenir à tout moment pour changer le niveau de difficulté</p>
       </div>
     </div>
   );
-}; 
+};

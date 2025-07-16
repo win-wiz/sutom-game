@@ -1,11 +1,13 @@
 import { MOCK_WORDS } from './wordService';
 
-// 词典验证结果接口
+// Interface de résultat de validation du dictionnaire
 export interface DictionaryValidationResult {
   isValid: boolean;
   error?: string;
   source?: string;
   suggestion?: string;
+  message?: string;
+  [key: string]: unknown;
 }
 
 export interface DictionaryProvider {
@@ -13,7 +15,7 @@ export interface DictionaryProvider {
   validate: (word: string) => Promise<DictionaryValidationResult>;
 }
 
-// API 响应类型定义
+// Définition du type de réponse API
 interface OpenAIResponse {
   choices: Array<{
     message: {
@@ -22,25 +24,25 @@ interface OpenAIResponse {
   }>;
 }
 
-// 第三方 API 验证器 (使用 mock 数据)
+// Validateur API tiers (utilisant des données mock)
 class ThirdPartyValidator implements DictionaryProvider {
   name = 'ThirdParty';
   
-  // Mock 词典数据
+  // Données de dictionnaire mock
   private mockDictionary = new Set([
-    // 基础词汇
+    // Vocabulaire de base
     'bonjour', 'merci', 'oui', 'non', 'chat', 'chien', 'maison',
-    // 中级词汇
+    // Vocabulaire intermédiaire
     'ordinateur', 'téléphone', 'voiture', 'jardin', 'cuisine',
-    // 高级词汇
+    // Vocabulaire avancé
     'cacophonie', 'épiphénomène', 'parallélépipède', 'anticonstitutionnellement',
-    // 从 wordService.ts 导入的词汇
+    // Vocabulaire importé de wordService.ts
     ...Object.values(MOCK_WORDS).flat()
   ]);
 
-  // 模拟 API 延迟
+  // Simuler le délai de l'API
   private async simulateApiDelay(): Promise<void> {
-    const delay = Math.random() * 300 + 100; // 100-400ms 随机延迟
+    const delay = Math.random() * 300 + 100; // Délai aléatoire de 100-400ms
     return new Promise(resolve => setTimeout(resolve, delay));
   }
 
@@ -51,13 +53,14 @@ class ThirdPartyValidator implements DictionaryProvider {
     
     return {
       isValid,
+      message: isValid ? 'Mot valide' : 'Mot non trouvé dans le dictionnaire tiers',
       source: 'ThirdParty',
-      error: !isValid ? '单词未在第三方词典中找到' : undefined
+      error: !isValid ? 'Mot non trouvé dans le dictionnaire tiers' : undefined
     };
   }
 }
 
-// AI 验证器 (使用 OpenAI 或其他 AI 模型)
+// Validateur IA (utilisant OpenAI ou d'autres modèles IA)
 class AIValidator implements DictionaryProvider {
   name = 'AI';
   private apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
@@ -104,9 +107,10 @@ class AIValidator implements DictionaryProvider {
 
       return {
         isValid,
+        message: isValid ? 'Mot valide' : 'Mot jugé invalide par l\'IA',
         source: 'AI',
         suggestion,
-        error: !isValid ? '单词被 AI 判定为无效' : undefined
+        error: !isValid ? 'Mot jugé invalide par l\'IA' : undefined
       };
     } catch (error) {
       throw new Error(`AI validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -114,55 +118,55 @@ class AIValidator implements DictionaryProvider {
   }
 }
 
-// 本地基础词典验证器 (作为备选方案)
+// Validateur de dictionnaire local de base (comme solution de repli)
 class LocalValidator implements DictionaryProvider {
   name = 'Local';
   
-  // 基础法语词汇列表 (扩展版本)
+  // Liste de vocabulaire français de base (version étendue)
   private commonWords = new Set([
-    // 常用词汇
+    // Vocabulaire courant
     'le', 'de', 'et', 'à', 'un', 'il', 'être', 'en', 'avoir', 'que', 'pour',
     'dans', 'ce', 'son', 'une', 'sur', 'avec', 'ne', 'se', 'pas', 'tout', 'plus',
     'par', 'grand', 'je', 'vous', 'la', 'tu', 'si', 'son', 'ce', 'dans',
     
-    // 问候语
+    // Salutations
     'bonjour', 'bonsoir', 'bonne', 'nuit', 'salut', 'merci', 'oui', 'non',
     'au revoir', 'pardon', 'excusez', 'moi', 'comment', 'allez', 'vous',
     
-    // 时间
+    // Temps
     'jour', 'soir', 'matin', 'midi', 'temps', 'année', 'mois', 'semaine',
     'heure', 'minute', 'seconde', 'aujourd', 'hui', 'demain', 'hier',
     
-    // 家庭
+    // Famille
     'maison', 'famille', 'enfant', 'parent', 'ami', 'personne', 'homme', 'femme',
     'père', 'mère', 'fils', 'fille', 'frère', 'sœur', 'grand', 'père', 'mère',
     
-    // 技术
+    // Technologie
     'téléphone', 'ordinateur', 'clavier', 'souris', 'écran', 'internet', 'site',
     'email', 'message', 'application', 'programme', 'fichier', 'dossier',
     
-    // 游戏相关
+    // Lié au jeu
     'cacophonie', 'jeu', 'jouer', 'gagner', 'perdre', 'essayer', 'deviner',
     'mot', 'lettre', 'alphabet', 'langue', 'français', 'dictionary',
     
-    // 动词
+    // Verbes
     'faire', 'dire', 'aller', 'voir', 'savoir', 'prendre', 'venir', 'vouloir',
     'pouvoir', 'falloir', 'devoir', 'croire', 'trouver', 'donner', 'parler',
     'aimer', 'passer', 'regarder', 'demander', 'rester', 'sembler', 'laisser',
     
-    // 形容词
+    // Adjectifs
     'bon', 'nouveau', 'premier', 'dernier', 'grand', 'petit', 'autre', 'même',
     'jeune', 'français', 'long', 'gros', 'fort', 'public', 'certain', 'social',
     
-    // 颜色
+    // Couleurs
     'rouge', 'bleu', 'vert', 'jaune', 'noir', 'blanc', 'rose', 'violet',
     'orange', 'gris', 'marron', 'beige',
     
-    // 数字
+    // Nombres
     'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix',
     'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'vingt', 'cent', 'mille',
     
-    // 其他常用词
+    // Autres mots courants
     'eau', 'pain', 'lait', 'fromage', 'viande', 'légume', 'fruit', 'pomme',
     'orange', 'banane', 'tomate', 'carotte', 'patate', 'salade', 'soupe',
     'restaurant', 'hôtel', 'magasin', 'école', 'université', 'hôpital',
@@ -175,13 +179,14 @@ class LocalValidator implements DictionaryProvider {
     
     return {
       isValid,
+      message: isValid ? 'Mot valide' : 'Mot non trouvé dans le dictionnaire',
       source: 'Local',
-      error: !isValid ? '单词未在本地词典中找到' : undefined
+      error: !isValid ? 'Mot non trouvé dans le dictionnaire local' : undefined
     };
   }
 }
 
-// 主词典验证服务
+// Service principal de validation du dictionnaire
 export class DictionaryService {
   private validators: DictionaryProvider[] = [
     new ThirdPartyValidator(),
@@ -195,16 +200,20 @@ export class DictionaryService {
     if (!normalizedWord) {
       return {
         isValid: false,
-        error: '单词不能为空'
+        message: 'Le mot ne peut pas être vide',
+        error: 'Le mot ne peut pas être vide'
       };
     }
 
-    // 尝试每个验证器
+    // Essayer chaque validateur
     for (const validator of this.validators) {
       try {
         const result = await validator.validate(normalizedWord);
         if (result.isValid) {
-          return result;
+          return {
+            ...result,
+            message: result.message ?? 'Mot valide'
+          };
         }
       } catch (error) {
         console.warn(`${validator.name} validator failed:`, error);
@@ -212,15 +221,16 @@ export class DictionaryService {
       }
     }
 
-    // 如果所有验证器都失败了
+    // Si tous les validateurs ont échoué
     return {
       isValid: false,
-      error: '无法验证单词的有效性，请稍后再试',
+      message: 'Impossible de vérifier la validité du mot, veuillez réessayer plus tard',
+      error: 'Impossible de vérifier la validité du mot, veuillez réessayer plus tard',
       source: 'None'
     };
   }
 
-  // 批量验证单词
+  // Validation en lot des mots
   async validateWords(words: string[]): Promise<DictionaryValidationResult[]> {
     const results: DictionaryValidationResult[] = [];
     
@@ -233,5 +243,5 @@ export class DictionaryService {
   }
 }
 
-// 导出单例实例
-export const dictionaryService = new DictionaryService(); 
+// Exporter l'instance singleton
+export const dictionaryService = new DictionaryService();

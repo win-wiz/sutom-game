@@ -1,6 +1,7 @@
 'use client';
 
 import { Calendar, Gamepad2 } from 'lucide-react';
+import { useMemo, useCallback } from 'react';
 import { wordService } from '@/lib/wordService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Difficulty } from '@/types/game';
@@ -20,8 +21,16 @@ export const GameModesCard = ({
   onStartClassic,
   onStartChallenge,
 }: GameModesCardProps) => {
+  // Cache difficulty levels to avoid repeated calls
+  const difficultyLevels = useMemo(() => wordService.getDifficultyLevels(), []);
 
-  const DailyChallengeContent = () => (
+  // Cache button styles to avoid recalculation
+  const buttonStyles = useMemo(() => ({
+    enabled: 'bg-green-600 hover:bg-green-500 text-white hover:scale-105 shadow-lg hover:shadow-green-600/40',
+    disabled: 'bg-gray-700 text-gray-400 cursor-not-allowed'
+  }), []);
+
+  const DailyChallengeContent = useCallback(() => (
     <div className="text-center py-8">
       <div
         onClick={onStartChallenge}
@@ -29,26 +38,26 @@ export const GameModesCard = ({
       >
         <div className="mb-4">
           <h3 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
-            开始今日挑战
+            Commencer le défi du jour
           </h3>
           <p className="text-gray-400 mt-2">
-            挑战今天的随机单词，只有一次机会！
+            Défiez le mot aléatoire d'aujourd'hui, une seule chance !
           </p>
         </div>
       </div>
     </div>
-  );
+  ), [onStartChallenge]);
 
-  const ClassicModeContent = () => (
+  const ClassicModeContent = useCallback(() => (
     <div className="flex flex-col h-full p-1">
       <div className="mb-6 text-center">
         <p className="text-gray-400">
-          选择你喜欢的难度开始新游戏。
+          Choisissez votre difficulté préférée pour commencer une nouvelle partie.
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        {wordService.getDifficultyLevels().map((level) => {
+        {difficultyLevels.map((level) => {
           const isSelected = selectedDifficulty === level.level;
           return (
             <div
@@ -78,12 +87,12 @@ export const GameModesCard = ({
       <button
         onClick={onStartClassic}
         disabled={!selectedDifficulty || isLoadingWord}
-        className={`w-full py-3 mt-auto rounded-lg font-semibold text-xl transition-all duration-300 transform ${selectedDifficulty && !isLoadingWord ? 'bg-green-600 hover:bg-green-500 text-white hover:scale-105 shadow-lg hover:shadow-green-600/40' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}`}
+        className={`w-full py-3 mt-auto rounded-lg font-semibold text-xl transition-all duration-300 transform ${selectedDifficulty && !isLoadingWord ? buttonStyles.enabled : buttonStyles.disabled}`}
       >
-        {isLoadingWord ? (<div className="flex items-center justify-center space-x-2"><div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div><span>加载中...</span></div>) : ('开始游戏')}
+        {isLoadingWord ? (<div className="flex items-center justify-center space-x-2"><div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div><span>Chargement...</span></div>) : ('Commencer le jeu')}
       </button>
     </div>
-  );
+  ), [difficultyLevels, selectedDifficulty, isLoadingWord, onDifficultySelect, onStartClassic, buttonStyles]);
 
   return (
     <div className="bg-gray-800/70 rounded-xl p-6 sm:p-8 border border-gray-700 shadow-md h-full">
@@ -91,11 +100,11 @@ export const GameModesCard = ({
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="challenge">
             <Calendar className="w-5 h-5 mr-2" />
-            每日挑战
+            Défi quotidien
           </TabsTrigger>
           <TabsTrigger value="classic">
             <Gamepad2 className="w-5 h-5 mr-2" />
-            经典模式
+            Mode classique
           </TabsTrigger>
         </TabsList>
         <TabsContent value="challenge">
@@ -107,4 +116,4 @@ export const GameModesCard = ({
       </Tabs>
     </div>
   );
-}; 
+};

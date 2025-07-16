@@ -1,138 +1,138 @@
 # Sutom Game
 
-一个基于 T3 Stack 构建的猜词游戏，类似于 Wordle。
+Un jeu de devinettes de mots construit avec T3 Stack, similaire à Wordle.
 
-## 项目简介
+## Présentation du Projet
 
-Sutom 是一个 Web 端猜词游戏，玩家需要通过多次猜测来找到正确的单词。游戏具有以下特色：
+Sutom est un jeu de devinettes de mots basé sur le web où les joueurs doivent deviner le mot correct à travers plusieurs tentatives. Le jeu présente les caractéristiques suivantes :
 
-- 🎮 类似 Wordle 的游戏玩法
-- 🎹 支持法语键盘布局 (AZERTY)
-- 🔊 丰富的音效反馈
-- 📱 响应式设计，支持移动设备
-- ⚡ 基于 T3 Stack 的现代技术栈
+- 🎮 Gameplay similaire à Wordle
+- 🎹 Support du clavier français (AZERTY)
+- 🔊 Retours sonores riches
+- 📱 Design responsive, compatible mobile
+- ⚡ Stack technologique moderne basé sur T3 Stack
 
-## 技术栈
+## Stack Technologique
 
-- **Next.js 13+** - React 框架，使用 App Router
-- **TypeScript** - 类型安全的 JavaScript
-- **TailwindCSS** - 实用优先的 CSS 框架
-- **React Hooks** - 状态管理和副作用处理
+- **Next.js 13+** - Framework React avec App Router
+- **TypeScript** - JavaScript avec sécurité de type
+- **TailwindCSS** - Framework CSS utility-first
+- **React Hooks** - Gestion d'état et effets de bord
 
-## 开始使用
+## Commencer
 
-### 安装依赖
+### Installation des Dépendances
 
 ```bash
 npm install
 ```
 
-### 启动开发服务器
+### Démarrer le Serveur de Développement
 
 ```bash
 npm run dev
 ```
 
-访问 [http://localhost:3000](http://localhost:3000) 开始游戏。
+Visitez [http://localhost:3000](http://localhost:3000) pour commencer à jouer.
 
-### 构建生产版本
+### Construire la Version de Production
 
 ```bash
 npm run build
 npm run start
 ```
 
-## 游戏规则
+## Règles du Jeu
 
-1. 猜测目标单词，每次猜测都是一个完整的单词
-2. 第一个字母已经给出作为提示
-3. 提交猜测后，每个字母会显示不同的颜色：
-   - 🟢 **绿色**: 字母正确且位置正确
-   - 🟡 **黄色**: 字母正确但位置错误
-   - ⚫ **灰色**: 字母不存在于目标单词中
+1. Devinez le mot cible, chaque tentative doit être un mot complet
+2. La première lettre est donnée comme indice
+3. Après avoir soumis une tentative, chaque lettre affichera une couleur différente :
+   - 🟢 **Vert** : Lettre correcte à la bonne position
+   - 🟡 **Jaune** : Lettre correcte mais à la mauvaise position
+   - ⚫ **Gris** : Lettre n'existe pas dans le mot cible
 
-## 游戏特色
+## Caractéristiques du Jeu
 
-### 音效反馈
-- 找到正确字母时播放成功音效
-- 字母位置错误时播放提示音效
-- 字母不存在时播放错误音效
-- 游戏获胜时播放胜利音效
+### Retours Sonores
+- Son de succès lors de la découverte d'une lettre correcte
+- Son d'indication lorsque la lettre est mal placée
+- Son d'erreur lorsque la lettre n'existe pas
+- Son de victoire lors de la réussite du jeu
 
-### 键盘支持
-- 支持物理键盘输入
-- 提供虚拟键盘交互
-- 键盘按键会根据使用情况显示对应状态
+### Support Clavier
+- Support de la saisie au clavier physique
+- Interface de clavier virtuel
+- Les touches du clavier affichent leur état selon l'utilisation
 
-### 自定义单词
-可以通过 URL 参数指定单词：
+### Mots Personnalisés
+Vous pouvez spécifier un mot via les paramètres URL :
 ```
-http://localhost:3000?word=<base64编码的单词>
+http://localhost:3000?word=<mot encodé en base64>
 ```
 
-例如：
+Par exemple :
 ```
 http://localhost:3000?word=Ym9uam91cg==
 ```
 
-## 项目结构
+## Structure du Projet
 
 ```
 src/
-├── app/                 # Next.js App Router 页面
-├── components/          # React 组件
-│   ├── Game.tsx        # 主游戏组件
-│   ├── GameGrid.tsx    # 游戏网格组件
-│   └── VirtualKeyboard.tsx # 虚拟键盘组件
-├── hooks/              # 自定义 React Hooks
-│   └── useGame.ts      # 游戏状态管理
-├── lib/                # 工具函数
-│   └── gameUtils.ts    # 游戏逻辑工具
-├── types/              # TypeScript 类型定义
-│   └── game.ts         # 游戏相关类型
-└── styles/             # 样式文件
-    └── globals.css     # 全局样式
+├── app/                 # Pages Next.js App Router
+├── components/          # Composants React
+│   ├── Game.tsx        # Composant principal du jeu
+│   ├── GameGrid.tsx    # Composant grille de jeu
+│   └── VirtualKeyboard.tsx # Composant clavier virtuel
+├── hooks/              # Hooks React personnalisés
+│   └── useGame.ts      # Gestion d'état du jeu
+├── lib/                # Fonctions utilitaires
+│   └── gameUtils.ts    # Outils logique de jeu
+├── types/              # Définitions de types TypeScript
+│   └── game.ts         # Types liés au jeu
+└── styles/             # Fichiers de styles
+    └── globals.css     # Styles globaux
 
-doc/                     # 项目文档
-├── requirements.md      # 需求文档
-├── changes.md          # 改动记录
-├── iterations.md       # 迭代过程
-├── project-summary.md  # 项目总结
-├── iteration-plan.md   # 迭代计划方案
-└── index.md           # 文档索引
+doc/                     # Documentation du projet
+├── requirements.md      # Documentation des exigences
+├── changes.md          # Journal des modifications
+├── iterations.md       # Processus d'itération
+├── project-summary.md  # Résumé du projet
+├── iteration-plan.md   # Plan d'itération
+└── index.md           # Index de la documentation
 ```
 
-## 开发命令
+## Commandes de Développement
 
 ```bash
-# 启动开发服务器
+# Démarrer le serveur de développement
 npm run dev
 
-# 构建项目
+# Construire le projet
 npm run build
 
-# 启动生产服务器
+# Démarrer le serveur de production
 npm run start
 
-# 代码检查
+# Vérification du code
 npm run lint
 
-# 代码格式化
+# Formatage du code
 npm run lint:fix
 ```
 
-## 部署
+## Déploiement
 
-项目可以部署到以下平台：
+Le projet peut être déployé sur les plateformes suivantes :
 
-- [Vercel](https://vercel.com) (推荐)
+- [Vercel](https://vercel.com) (recommandé)
 - [Netlify](https://netlify.com)
 - [Railway](https://railway.app)
 
-## 贡献
+## Contribution
 
-欢迎提交 Issue 和 Pull Request 来改进项目。
+Les Issues et Pull Requests sont les bienvenus pour améliorer le projet.
 
-## 许可证
+## Licence
 
 MIT License

@@ -43,26 +43,26 @@ const ChallengeStatsPanel: React.FC<ChallengeStatsPanelProps> = React.memo(({ se
     <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700/50">
       <h3 className="text-lg font-bold text-white mb-4 flex items-center">
         <span className="mr-2 text-xl">🌐</span>
-        全网统计
+Statistiques du réseau
       </h3>
       
       <div className="grid grid-cols-[auto,1fr,auto,1fr] grid-rows-4 gap-x-6 gap-y-3">
-        <StatItem label="参与人数" value={server.totalParticipants?.toLocaleString() ?? '-'} />
-        <StatItem label="全网胜率" value={`${(server.winRate ?? 0).toFixed(1)}%`} />
+        <StatItem label="Participants" value={server.totalParticipants?.toLocaleString() ?? '-'} />
+        <StatItem label="Taux de victoire" value={`${(server.winRate ?? 0).toFixed(1)}%`} />
         
-        <StatItem label="完成挑战" value={server.totalCompleted?.toLocaleString() ?? '-'} />
-        <StatItem label="平均尝试" value={`${(server.averageAttempts ?? 0).toFixed(1)}次`} />
+        <StatItem label="Défis terminés" value={server.totalCompleted?.toLocaleString() ?? '-'} />
+        <StatItem label="Tentatives moy." value={`${(server.averageAttempts ?? 0).toFixed(1)} fois`} />
         
-        <StatItem label="胜利次数" value={server.totalWon?.toLocaleString() ?? '-'} />
-        <StatItem label="平均用时" value={`${Math.round((server.averageGameTime ?? 0) / 1000)}s`} />
+        <StatItem label="Victoires" value={server.totalWon?.toLocaleString() ?? '-'} />
+        <StatItem label="Temps moyen" value={`${Math.round((server.averageGameTime ?? 0) / 1000)}s`} />
 
-        <StatItem label="完成率" value={`${(server.completionRate ?? 0).toFixed(1)}%`} />
+        <StatItem label="Taux de réussite" value={`${(server.completionRate ?? 0).toFixed(1)}%`} />
         <StatItem 
-          label="服务状态" 
+          label="État du service" 
           value={
             <span className="flex items-center justify-end gap-2">
               <div className={`w-3 h-3 rounded-full ${server.isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              {server.isActive ? '活跃' : '维护'}
+              {server.isActive ? 'Actif' : 'Maintenance'}
             </span>
           } 
         />
@@ -73,4 +73,4 @@ const ChallengeStatsPanel: React.FC<ChallengeStatsPanelProps> = React.memo(({ se
 
 ChallengeStatsPanel.displayName = 'ChallengeStatsPanel';
 
-export default ChallengeStatsPanel; 
+export default ChallengeStatsPanel;

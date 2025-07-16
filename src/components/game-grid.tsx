@@ -39,7 +39,7 @@ const GameCell = ({ letter, state }: { letter: string; state: LetterState }) => 
   );
 };
 
-export const GameGrid = ({ rows, currentRow, wordLength }: GameGridProps) => {
+export const GameGrid = ({ rows }: GameGridProps) => {
   return (
     <div className="flex flex-col items-center space-y-0.5">
       {rows.map((row, rowIndex) => (
@@ -55,4 +55,4 @@ export const GameGrid = ({ rows, currentRow, wordLength }: GameGridProps) => {
       ))}
     </div>
   );
-}; 
+};

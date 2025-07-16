@@ -12,7 +12,7 @@ interface DailyChallengeState {
   won: boolean;
   guesses: string[];
   completedAt?: string;
-  sessionId: string; // 改为必需字段
+  sessionId: string; // Changer en champ obligatoire
 }
 
 type DailyChallengeHistory = Record<string, DailyChallengeState>;
@@ -22,57 +22,58 @@ export class DailyChallengeService {
   private static readonly HISTORY_KEY = 'sutom-daily-challenge-history';
 
   /**
-   * 将日期字符串转换为数字种子
-   * 使用简单的哈希函数确保相同日期总是生成相同的种子
+   * Convertir la chaîne de date en graine numérique
+   * Utiliser une fonction de hachage simple pour s'assurer que la même date génère toujours la même graine
    */
   private static dateToSeed(dateString: string): number {
     let hash = 0;
     for (let i = 0; i < dateString.length; i++) {
       const char = dateString.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // 转换为32位整数
+      hash = hash & hash; // Convertir en entier 32 bits
     }
     return Math.abs(hash);
   }
 
   /**
-   * 获取今日日期字符串
+   * Obtenir la chaîne de date d'aujourd'hui
    */
   private static getTodayString(): string {
     const today = new Date();
-    const dateString = today.toISOString().split('T')[0]?.replace(/-/g, ''); // 获取今天日期
+    const dateString = today.toISOString().split('T')[0]?.replace(/-/g, ''); // Obtenir la date d'aujourd'hui
     if (!dateString) {
-      throw new Error('无法获取今日日期');
+      // Lancer une erreur en français
+      throw new Error('Impossible de récupérer la date du jour');
     }
     return dateString;
   }
 
   /**
-   * 基于日期生成每日挑战单词（完全随机）
+   * Générer le mot du défi quotidien basé sur la date (complètement aléatoire)
    */
   private static generateDailyWord(dateString: string): { word: string; difficulty: Difficulty } {
     const seed = this.dateToSeed(dateString);
     
-    // 获取所有单词，不分难度
+    // Obtenir tous les mots, sans distinction de difficulté
     const allWords = wordService.getAllWords();
     
     if (allWords.length === 0) {
-      throw new Error('没有可用的单词');
+      throw new Error('Aucun mot disponible');
     }
     
-    // 基于种子随机选择单词
+    // Sélectionner aléatoirement un mot basé sur la graine
     const wordIndex = seed % allWords.length;
     const selectedWord = allWords[wordIndex];
     
     if (!selectedWord) {
-      throw new Error('无法获取单词');
+      throw new Error('Impossible de récupérer le mot');
     }
     
     return { word: selectedWord.word, difficulty: selectedWord.difficulty };
   }
 
   /**
-   * 安全的localStorage操作 - 处理服务器端渲染
+   * Opération localStorage sécurisée - gérer le rendu côté serveur
    */
   private static safeGetItem(key: string): string | null {
     if (typeof window === 'undefined') return null;
@@ -84,19 +85,19 @@ export class DailyChallengeService {
   }
 
   /**
-   * 安全的localStorage操作 - 处理服务器端渲染
+   * Opération localStorage sécurisée - gérer le rendu côté serveur
    */
   private static safeSetItem(key: string, value: string): void {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(key, value);
     } catch (error) {
-      console.error('保存数据失败:', error);
+      console.error('Échec de la sauvegarde des données:', error);
     }
   }
 
   /**
-   * 获取今日挑战信息
+   * Obtenir les informations du défi d'aujourd'hui
    */
   static async getTodayChallenge(): Promise<DailyChallengeState> {
     const today = this.getTodayString();
@@ -105,69 +106,69 @@ export class DailyChallengeService {
     if (stored) {
       try {
         const challenge = JSON.parse(stored) as DailyChallengeState;
-        // 如果存储的是今天的挑战，直接返回
+        // Si le défi stocké est celui d'aujourd'hui, le retourner directement
         if (challenge.date === today) {
           return challenge;
         }
       } catch (error) {
-        console.error('解析每日挑战数据失败:', error);
+        console.error('Échec de la récupération des données du défi quotidien:', error);
       }
     }
     
     try {
-      // 调用后台接口获取每日挑战
+      // Appeler l'interface backend pour obtenir le défi quotidien
       const response = await gameSessionAPI.startDailyChallenge({ date: today });
       
       if (!response.success || !response.data) {
-        throw new Error('获取每日挑战失败');
+        throw new Error('Échec de la récupération du défi quotidien');
       }
       
       const { sessionId, wordData, gameInfo } = response.data;
       
       const newChallenge: DailyChallengeState = {
         date: today,
-        word: wordData.maskedWord, // 使用掩码后的单词
+        word: wordData.maskedWord, // Utiliser le mot masqué
         difficulty: wordData.difficulty as Difficulty,
         completed: false,
         attempts: gameInfo.attempts,
         won: false,
         guesses: [],
-        sessionId, // 保存 sessionId
+        sessionId, // Sauvegarder sessionId
       };
       
-      // 保存到本地存储
+      // Sauvegarder dans le stockage local
       this.safeSetItem(this.STORAGE_KEY, JSON.stringify(newChallenge));
       
       return newChallenge;
     } catch (error) {
-      console.error('获取每日挑战失败:', error);
+      console.error('Échec de la récupération du défi quotidien:', error);
       throw error;
     }
   }
 
   /**
-   * 更新今日挑战状态
+   * Mettre à jour le statut du défi d'aujourd'hui
    */
   static async updateTodayChallenge(updates: Partial<DailyChallengeState>): Promise<void> {
     const current = await this.getTodayChallenge();
     const updated = { ...current, ...updates };
     
-    // 如果游戏完成，记录完成时间
+    // Si le jeu est terminé, enregistrer l'heure de completion
     if (updated.completed && !current.completed) {
       updated.completedAt = new Date().toISOString();
     }
     
-    // 更新当前挑战
+    // Mettre à jour le défi actuel
     this.safeSetItem(this.STORAGE_KEY, JSON.stringify(updated));
     
-    // 如果游戏完成，保存到历史记录
+    // Si le jeu est terminé, sauvegarder dans l'historique
     if (updated.completed) {
       this.saveToHistory(updated);
     }
   }
 
   /**
-   * 保存到历史记录
+   * Sauvegarder dans l'historique
    */
   private static saveToHistory(challenge: DailyChallengeState): void {
     const historyStr = this.safeGetItem(this.HISTORY_KEY);
@@ -177,7 +178,7 @@ export class DailyChallengeService {
       try {
         history = JSON.parse(historyStr) as DailyChallengeHistory;
       } catch (error) {
-        console.error('解析历史记录失败:', error);
+        console.error('Échec de la récupération de l\'historique:', error);
         history = {};
       }
     }
@@ -187,7 +188,7 @@ export class DailyChallengeService {
   }
 
   /**
-   * 获取历史记录
+   * Obtenir l'historique
    */
   static getHistory(): DailyChallengeHistory {
     const historyStr = this.safeGetItem(this.HISTORY_KEY);
@@ -196,13 +197,13 @@ export class DailyChallengeService {
     try {
       return JSON.parse(historyStr) as DailyChallengeHistory;
     } catch (error) {
-      console.error('解析历史记录失败:', error);
+      console.error('Échec de la récupération de l\'historique:', error);
       return {};
     }
   }
 
   /**
-   * 获取每日挑战统计信息（使用新的 /daily-stats/:date 接口）
+   * Obtenir les statistiques du défi quotidien (utiliser la nouvelle interface /daily-stats/:date)
    */
   static async getDailyStats(date?: string, userId?: string): Promise<DailyChallengeStats | null> {
     const targetDate = date ?? this.getTodayString();
@@ -216,30 +217,30 @@ export class DailyChallengeService {
       if (response.success && response.data) {
         return response.data;
       } else {
-        console.warn('获取每日挑战统计失败:', response.message);
+        console.warn('Échec de la récupération des statistiques du défi quotidien:', response.message);
         return null;
       }
     } catch (error) {
-      console.warn('调用getDailyStats API失败:', error);
+      console.warn('Échec de l\'appel à l\'API getDailyStats:', error);
       return null;
     }
   }
 
   /**
-   * 获取统计信息（兼容旧接口，本地模式 + 服务器统计）
+   * Obtenir les statistiques (compatible avec l'ancienne interface, mode local + statistiques serveur)
    */
   static async getStats(): Promise<{
     personal: LegacyPersonalStats;
     server: DailyChallengeStats['server'] | null;
   }> {
-    // 个人统计（本地）
+    // Statistiques personnelles (locales)
     const history = this.getHistory();
     const challenges = Object.values(history).sort((a, b) => a.date.localeCompare(b.date));
     const totalChallenges = challenges.length;
     const totalWins = challenges.filter(c => c.won).length;
     const winRate = totalChallenges > 0 ? (totalWins / totalChallenges) * 100 : 0;
     
-    // 计算当前连胜
+    // Calculer la série de victoires actuelle
     let currentStreak = 0;
     for (let i = challenges.length - 1; i >= 0; i--) {
       const challenge = challenges[i];
@@ -250,7 +251,7 @@ export class DailyChallengeService {
       }
     }
     
-    // 计算最长连胜
+    // Calculer la plus longue série de victoires
     let maxStreak = 0;
     let tempStreak = 0;
     for (const challenge of challenges) {
@@ -262,7 +263,7 @@ export class DailyChallengeService {
       }
     }
     
-    // 计算平均尝试次数
+    // Calculer le nombre moyen de tentatives
     const completedChallenges = challenges.filter(c => c.completed);
     const averageAttempts = completedChallenges.length > 0 
       ? completedChallenges.reduce((sum, c) => sum + c.attempts, 0) / completedChallenges.length
@@ -277,7 +278,7 @@ export class DailyChallengeService {
       averageAttempts,
     };
     
-    // 全网统计（新接口）
+    // Statistiques du réseau (nouvelle interface)
     let server: DailyChallengeStats['server'] | null = null;
     try {
       const dailyStats = await this.getDailyStats();
@@ -285,15 +286,15 @@ export class DailyChallengeService {
         server = dailyStats.server;
       }
     } catch (e) {
-      // 忽略错误，server 设为 null
-      console.warn('获取服务器统计失败:', e);
+      // Ignorer les erreurs, définir server à null
+      console.warn('Échec de la récupération des statistiques du serveur:', e);
     }
     
     return { personal, server };
   }
 
   /**
-   * 获取完整的每日挑战统计信息（新接口）
+   * Obtenir les statistiques complètes du défi quotidien (nouvelle interface)
    */
   static async getFullDailyStats(date?: string, userId?: string): Promise<{
     stats: DailyChallengeStats | null;
@@ -309,7 +310,7 @@ export class DailyChallengeService {
   }
 
   /**
-   * 检查是否可以进行今日挑战
+   * Vérifier si le défi d'aujourd'hui peut être joué
    */
   static async canPlayToday(): Promise<boolean> {
     const today = await this.getTodayChallenge();
@@ -317,7 +318,7 @@ export class DailyChallengeService {
   }
 
   /**
-   * 获取下一次挑战的时间
+   * Obtenir l'heure du prochain défi
    */
   static getNextChallengeTime(): Date {
     const tomorrow = new Date();
@@ -327,7 +328,7 @@ export class DailyChallengeService {
   }
 
   /**
-   * 格式化分享文本
+   * Formater le texte de partage
    */
   static formatShareText(challenge: DailyChallengeState): string {
     const { date, difficulty, won, attempts } = challenge;
@@ -340,11 +341,11 @@ export class DailyChallengeService {
     const result = won ? `${attempts}/6` : 'X/6';
     const emoji = difficultyEmoji[difficulty];
     
-    return `Sutom 每日挑战 ${date}
+    return `Sutom Défi Quotidien ${date}
 ${emoji} ${difficulty.toUpperCase()} ${result}
 
-#Sutom #每日挑战`;
+#Sutom #DéfiQuotidien`;
   }
 }
 
-export const dailyChallengeService = DailyChallengeService; 
+export const dailyChallengeService = DailyChallengeService;

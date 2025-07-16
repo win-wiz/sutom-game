@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { type GameState } from '@/types/game';
 import { type GameStats as FullGameStats, type EndGameData } from '@/types';
 import {
@@ -23,11 +23,25 @@ interface GameResultDialogProps {
   endGameData?: EndGameData | null;
 }
 
-// 默认的空统计函数
+// Fonction de statistiques par défaut
 const defaultGetGameStats = async (): Promise<FullGameStats | null> => {
-  console.warn('getGameStats 函数未提供，使用默认实现');
+  console.warn('Fonction getGameStats non fournie, utilisation de l\'implémentation par défaut');
   return null;
 };
+
+// Constantes pour les styles et textes
+const DIFFICULTY_CONFIG = {
+  easy: { label: 'Facile', color: 'bg-green-500/10 text-green-400 border border-green-500/20' },
+  medium: { label: 'Moyen', color: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' },
+  hard: { label: 'Difficile', color: 'bg-red-500/10 text-red-400 border border-red-500/20' }
+} as const;
+
+const LOADING_STATS_ITEMS = [
+  'Total des parties',
+  'Taux de victoire',
+  'Tentatives moyennes',
+  'Temps moyen'
+] as const;
 
 export const GameResultDialog = ({
   gameState,
@@ -42,17 +56,30 @@ export const GameResultDialog = ({
   const [gameStats, setGameStats] = useState<FullGameStats['overall'] | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
 
-  // const difficultyInfo = gameState.difficulty ? 
-  //   wordService.getDifficultyLevels().find(d => d.level === gameState.difficulty) : null;
+  // Mémorisation des états de jeu
+  const gameStatus = useMemo(() => ({
+    isWon: gameState.gameStatus === 'won',
+    isLost: gameState.gameStatus === 'lost'
+  }), [gameState.gameStatus]);
 
-  const isWon = gameState.gameStatus === 'won';
-  const isLost = gameState.gameStatus === 'lost';
+  // Mémorisation de la configuration de difficulté
+  const difficultyConfig = useMemo(() => {
+    const difficulty = gameState.difficulty as keyof typeof DIFFICULTY_CONFIG;
+    return DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.easy;
+  }, [gameState.difficulty]);
 
-  // 当弹窗打开时获取统计信息
+  // Mémorisation des statistiques de progression
+  const progressStats = useMemo(() => ({
+    attempts: gameState.currentRow + 1,
+    maxAttempts: 6,
+    successRate: gameStatus.isWon ? 100 : 0
+  }), [gameState.currentRow, gameStatus.isWon]);
+
+  // Récupération des statistiques lors de l'ouverture du dialogue
   useEffect(() => {
-    if (isOpen && (isWon || isLost)) {
+    if (isOpen && (gameStatus.isWon || gameStatus.isLost)) {
       if (typeof getGameStats !== 'function') {
-        console.warn('getGameStats 不是一个函数:', getGameStats);
+        console.warn('getGameStats n\'est pas une fonction:', getGameStats);
         return;
       }
       setIsLoadingStats(true);
@@ -61,54 +88,55 @@ export const GameResultDialog = ({
           if (stats?.overall) {
             setGameStats(stats.overall);
           } else {
-            // Fallback for unexpected structure
+            // Fallback pour structure inattendue
             setGameStats(null);
           }
         })
         .catch((error) => {
-          console.warn('获取游戏统计失败:', error);
+          console.warn('Échec de récupération des statistiques:', error);
           setGameStats(null);
         })
         .finally(() => {
           setIsLoadingStats(false);
         });
     }
-  }, [isOpen, isWon, isLost, getGameStats]);
+  }, [isOpen, gameStatus.isWon, gameStatus.isLost, getGameStats]);
 
-  // 添加一个工具函数来处理数值转换
-  const formatNumber = (value: number | string | null | undefined, decimals = 1): string => {
+  // Fonction utilitaire pour formater les nombres
+  const formatNumber = useCallback((value: number | string | null | undefined, decimals = 1): string => {
     if (value === null || value === undefined) return '0.0';
     const num = typeof value === 'string' ? parseFloat(value) : value;
     return isNaN(num) ? '0.0' : num.toFixed(decimals);
-  };
+  }, []);
 
-  if (!isWon && !isLost) return null;
+  // Rendu conditionnel optimisé
+  if (!gameStatus.isWon && !gameStatus.isLost) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl w-full bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 border-none text-white p-4 max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl">
-        {/* 顶部标题区 */}
+        {/* Zone de titre en haut */}
         <DialogHeader className="sticky top-0 bg-gradient-to-b from-gray-900 to-gray-900/95 pb-3 z-10">
           <div className="text-center space-y-2">
             <div className="inline-flex items-center justify-center">
-              <span className="text-2xl animate-bounce">{isWon ? '🎉' : '😞'}</span>
+              <span className="text-2xl animate-bounce">{gameStatus.isWon ? '🎉' : '😞'}</span>
             </div>
             <DialogTitle className={`text-xl font-bold ${
-              isWon ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gradient-to-r from-red-400 to-rose-400'
+              gameStatus.isWon ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gradient-to-r from-red-400 to-rose-400'
             } text-transparent bg-clip-text`}>
-              {isWon ? '恭喜您获胜！' : '游戏结束'}
+              {gameStatus.isWon ? 'Félicitations, vous avez gagné !' : 'Partie terminée'}
             </DialogTitle>
             <DialogDescription className="text-gray-300 text-sm">
-              {isWon ? (
+              {gameStatus.isWon ? (
                 <span className="inline-flex items-center justify-center gap-2">
-                  <span>成功猜出单词:</span>
+                  <span>Mot trouvé avec succès :</span>
                   <span className="font-mono font-bold text-base px-2 py-0.5 rounded bg-green-500/10 text-green-300 border border-green-500/20">
                     {gameState.targetWord}
                   </span>
                 </span>
               ) : (
                 <span className="inline-flex items-center justify-center gap-2">
-                  <span>正确答案是:</span>
+                  <span>La bonne réponse était :</span>
                   <span className="font-mono font-bold text-base px-2 py-0.5 rounded bg-red-500/10 text-red-300 border border-red-500/20">
                     {gameState.targetWord}
                   </span>
@@ -118,61 +146,56 @@ export const GameResultDialog = ({
           </div>
         </DialogHeader>
 
-        {/* 游戏数据卡片区 */}
+        {/* Zone des cartes de données de jeu */}
         <div className="space-y-3 py-3">
-          {/* 单词信息卡片 */}
+          {/* Carte d'informations sur le mot */}
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <div className="relative bg-gray-900/90 rounded-lg p-4 border border-indigo-500/20">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-indigo-400 text-lg">📝</span>
-                  <h3 className="text-indigo-400 font-medium">单词详情</h3>
+                  <h3 className="text-indigo-400 font-medium">Détails du mot</h3>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  gameState.difficulty === 'easy' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
-                  gameState.difficulty === 'medium' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
-                  'bg-red-500/10 text-red-400 border border-red-500/20'
-                }`}>
-                  {gameState.difficulty === 'easy' ? '简单' :
-                   gameState.difficulty === 'medium' ? '中等' : '困难'}
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${difficultyConfig.color}`}>
+                  {difficultyConfig.label}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
-                  <div className="text-gray-400 text-sm mb-1">单词</div>
+                  <div className="text-gray-400 text-sm mb-1">Mot</div>
                   <div className="text-lg font-mono font-semibold text-white">{gameState.targetWord}</div>
                 </div>
                 <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
-                  <div className="text-gray-400 text-sm mb-1">长度</div>
-                  <div className="text-lg font-mono font-semibold text-blue-400">{gameState.targetWord.length} 字母</div>
+                  <div className="text-gray-400 text-sm mb-1">Longueur</div>
+                  <div className="text-lg font-mono font-semibold text-blue-400">{gameState.targetWord.length} lettres</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 本局统计卡片 */}
+          {/* Carte des statistiques de cette partie */}
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <div className="relative bg-gray-900/90 rounded-lg p-4 border border-emerald-500/20">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-emerald-400 text-lg">📊</span>
-                <h3 className="text-emerald-400 font-medium">本局统计</h3>
+                <h3 className="text-emerald-400 font-medium">Statistiques de cette partie</h3>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
-                  <div className="text-gray-400 text-sm mb-1">尝试次数</div>
+                  <div className="text-gray-400 text-sm mb-1">Tentatives</div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-mono font-semibold text-emerald-400">{gameState.currentRow + 1}</span>
+                    <span className="text-lg font-mono font-semibold text-emerald-400">{progressStats.attempts}</span>
                     <span className="text-gray-500 text-sm">/</span>
-                    <span className="text-gray-400 text-sm">6</span>
+                    <span className="text-gray-400 text-sm">{progressStats.maxAttempts}</span>
                   </div>
                   <div className="flex gap-1 mt-2">
-                    {Array.from({ length: 6 }, (_, i) => (
+                    {Array.from({ length: progressStats.maxAttempts }, (_, i) => (
                       <div
                         key={i}
                         className={`h-1 rounded-full flex-1 ${
-                          i < gameState.currentRow + 1
+                          i < progressStats.attempts
                             ? 'bg-emerald-500'
                             : 'bg-gray-700'
                         }`}
@@ -181,14 +204,14 @@ export const GameResultDialog = ({
                   </div>
                 </div>
                 <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
-                  <div className="text-gray-400 text-sm mb-1">成功率</div>
+                  <div className="text-gray-400 text-sm mb-1">Taux de réussite</div>
                   <div className="text-lg font-mono font-semibold text-emerald-400">
-                    {isWon ? '100%' : '0%'}
+                    {progressStats.successRate}%
                   </div>
                   <div className="h-1 bg-gray-700 rounded-full mt-2">
                     <div
                       className="h-1 bg-emerald-500 rounded-full"
-                      style={{ width: isWon ? '100%' : '0%' }}
+                      style={{ width: `${progressStats.successRate}%` }}
                     />
                   </div>
                 </div>
@@ -196,20 +219,20 @@ export const GameResultDialog = ({
             </div>
           </div>
 
-          {/* 全局统计卡片 */}
+          {/* Carte des statistiques globales */}
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <div className="relative bg-gray-900/90 rounded-lg p-4 border border-purple-500/20 min-h-[200px]">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-purple-400 text-lg">🏆</span>
-                <h3 className="text-purple-400 font-medium">全局统计</h3>
+                <h3 className="text-purple-400 font-medium">Statistiques globales</h3>
               </div>
               {isLoadingStats ? (
                 <div className="grid grid-cols-2 gap-3">
-                  {[1, 2, 3, 4].map((i) => (
+                  {LOADING_STATS_ITEMS.map((label, i) => (
                     <div key={i} className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
                       <div className="text-gray-400 text-sm mb-1">
-                        {i === 1 ? '总游戏' : i === 2 ? '胜率' : i === 3 ? '平均尝试' : '平均用时'}
+                        {label}
                       </div>
                       <div className="text-lg font-mono font-semibold text-purple-400/50">
                         -
@@ -220,36 +243,36 @@ export const GameResultDialog = ({
               ) : gameStats ? (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
-                    <div className="text-gray-400 text-sm mb-1">总游戏</div>
+                    <div className="text-gray-400 text-sm mb-1">Total des parties</div>
                     <div className="text-lg font-mono font-semibold text-purple-400">
                       {gameStats.totalSessions}
                     </div>
                   </div>
                   <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
-                    <div className="text-gray-400 text-sm mb-1">胜率</div>
+                    <div className="text-gray-400 text-sm mb-1">Taux de victoire</div>
                     <div className="text-lg font-mono font-semibold text-purple-400">
                       {formatNumber(gameStats.winRate * 100, 1)}%
                     </div>
                   </div>
                   <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
-                    <div className="text-gray-400 text-sm mb-1">平均尝试</div>
+                    <div className="text-gray-400 text-sm mb-1">Tentatives moyennes</div>
                     <div className="text-lg font-mono font-semibold text-purple-400">
-                      {formatNumber(gameStats.averageAttempts)} 次
+                      {formatNumber(gameStats.averageAttempts)} fois
                     </div>
                   </div>
                   <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
-                    <div className="text-gray-400 text-sm mb-1">平均用时</div>
+                    <div className="text-gray-400 text-sm mb-1">Temps moyen</div>
                     <div className="text-lg font-mono font-semibold text-purple-400">
-                      {formatNumber(gameStats.averageGameTime, 0)} 秒
+                      {formatNumber(gameStats.averageGameTime, 0)} sec
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
-                  {[1, 2, 3, 4].map((i) => (
+                  {LOADING_STATS_ITEMS.map((label, i) => (
                     <div key={i} className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
                       <div className="text-gray-400 text-sm mb-1">
-                        {i === 1 ? '总游戏' : i === 2 ? '胜率' : i === 3 ? '平均尝试' : '平均用时'}
+                        {label}
                       </div>
                       <div className="text-lg font-mono font-semibold text-purple-400/50">
                         -
@@ -262,13 +285,13 @@ export const GameResultDialog = ({
           </div>
         </div>
 
-        {/* 底部按钮区 */}
+        {/* Zone des boutons en bas */}
         <DialogFooter className="sticky bottom-0 bg-gradient-to-t from-gray-900 to-gray-900/95 pt-3 z-10 flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 mt-3">
           <button
             onClick={onRestartGame}
             disabled={isLoadingWord}
             className={`w-full sm:w-1/2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
-              ${isWon 
+              ${gameStatus.isWon 
                 ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white shadow-lg shadow-green-900/30' 
                 : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-lg shadow-red-900/30'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
@@ -276,11 +299,11 @@ export const GameResultDialog = ({
             {isLoadingWord ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                加载中...
+                Chargement...
               </span>
             ) : (
               <span className="flex items-center justify-center gap-2">
-                {isWon ? '🎮 再来一局' : '🔄 重新挑战'}
+                {gameStatus.isWon ? '🎮 Rejouer' : '🔄 Nouveau défi'}
               </span>
             )}
           </button>
@@ -291,7 +314,7 @@ export const GameResultDialog = ({
               text-white shadow-lg shadow-gray-900/30"
           >
             <span className="flex items-center justify-center gap-2">
-              🏠 返回主菜单
+              🏠 Retour au menu
             </span>
           </button>
         </DialogFooter>
