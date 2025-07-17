@@ -5,7 +5,7 @@ import { useGame } from '@/contexts/GameContext';
 import { LoadingSpinner } from './loading-spinner';
 import { MainMenu } from './main-menu';
 import { GamePlay } from './game-play';
-import { Footer } from './footer';
+// import { Footer } from './footer';
 import { useCountdown } from '@/hooks/useCountdown';
 import { useDailyChallenge } from '@/hooks/useDailyChallenge';
 import { useGameEnd } from '@/hooks/useGameEnd';
@@ -91,38 +91,7 @@ const GameComponent = () => {
     }
   }, [isClient, gameMode, fetchStats]);
 
-  // 根据游戏模式控制页面滚动
-  useEffect(() => {
-    if (!isClient) return;
-    
-    const body = document.body;
-    const main = document.querySelector('main');
-    
-    if (gameMode === 'main-menu') {
-      // 主菜单模式：允许滚动
-      body.style.overflow = 'auto';
-      if (main) {
-        main.style.overflow = 'auto';
-        main.style.height = 'auto';
-      }
-    } else {
-      // 游戏模式：禁止滚动，固定高度
-      body.style.overflow = 'hidden';
-      if (main) {
-        main.style.overflow = 'hidden';
-        main.style.height = '100vh';
-      }
-    }
-    
-    // 清理函数：组件卸载时恢复默认状态
-    return () => {
-      body.style.overflow = 'auto';
-      if (main) {
-        main.style.overflow = 'auto';
-        main.style.height = 'auto';
-      }
-    };
-  }, [isClient, gameMode]);
+  // 移除了滚动控制逻辑，现在由DynamicLayout组件处理
 
   // 结果对话框回调函数
   const handleRestartFromDialog = useCallback(() => {
@@ -143,7 +112,7 @@ const GameComponent = () => {
   // 主菜单模式
   if (gameMode === 'main-menu') {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="h-full flex flex-col">
         <div className="flex-1">
           <MainMenu
             // Daily Challenge props
@@ -164,7 +133,6 @@ const GameComponent = () => {
             onQuickStart={quickStart}
           />
         </div>
-        <Footer />
       </div>
     );
   }
@@ -188,7 +156,7 @@ const GameComponent = () => {
 
   // 游戏进行模式
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-full flex flex-col">
       <div className="flex-1">
         <GamePlay
           gameState={gameState}
@@ -206,7 +174,6 @@ const GameComponent = () => {
           getGameStats={getGameStats}
         />
       </div>
-      <Footer />
     </div>
   );
 };

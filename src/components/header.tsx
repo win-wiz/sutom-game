@@ -59,40 +59,40 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-10 w-full border-b border-gray-700/50 bg-gray-800">
-      <div className="container mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center space-x-4">
+    <header className={`sticky top-0 z-10 w-full border-b border-gray-700/50 bg-gray-800 h-16`}>
+      <div className={`container mx-auto flex max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16`}>
+        <div className="flex items-center space-x-2">
           <Link href="/" className="flex items-center space-x-2">
             <Image 
               src={logo} 
               alt="logo" 
-              width={32} 
-              height={32} 
-              className="opacity-90 md:w-8 md:h-8" 
+              width={gameMode === 'playing' ? 24 : 32} 
+              height={gameMode === 'playing' ? 24 : 32} 
+              className="opacity-90" 
             />
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">Sutom</span>
+            <span className={`font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent ${
+              gameMode === 'playing' ? 'text-lg' : 'text-2xl'
+            }`}>Sutom</span>
           </Link>
 
-          {/* Informations du jeu - affiché uniquement en mode jeu */}
+          {/* Informations du jeu - affiché uniquement en mode jeu avec layout optimisé */}
           {gameMode === 'playing' && gameState && (
-            <div className="flex items-center space-x-4 ml-6">
+            <div className="flex items-center space-x-2 ml-3">
               {isDailyChallenge ? (
-                <div className="flex items-center space-x-2">
-                  <span className="text-purple-400">📅</span>
-                  <span className="text-purple-400 font-medium">Défi quotidien</span>
+                <div className="flex items-center space-x-1">
+                  <span className="text-purple-400 text-sm">📅</span>
+                  <span className="text-purple-400 font-medium text-sm hidden sm:inline">Défi quotidien</span>
+                  <span className="text-purple-400 font-medium text-sm sm:hidden">Défi</span>
                 </div>
               ) : (
                 <>
                   {difficultyInfo && (
-                    <div className={`px-2 py-1 rounded text-sm font-medium ${difficultyInfo.className}`}>
+                    <div className={`px-1.5 py-0.5 rounded text-xs font-medium ${difficultyInfo.className} hidden sm:block`}>
                       {difficultyInfo.label}
                     </div>
                   )}
-                  <div className="text-gray-400 text-sm">
-                    Longueur: {gameState.targetWord.length}
-                  </div>
-                  <div className="text-gray-400 text-sm">
-                    Progrès: {gameState.currentRow}/6
+                  <div className="text-gray-400 text-xs">
+                    {gameState.currentRow}/6
                   </div>
                 </>
               )}
@@ -101,7 +101,9 @@ const Header = () => {
         </div>
 
         {/* Boutons de contrôle - différents selon le mode */}
-        <div className="flex items-center space-x-3">
+        <div className={`flex items-center ${
+          gameMode === 'playing' ? 'space-x-1.5' : 'space-x-3'
+        }`}>
           {/* Icône d'aide - affiché uniquement en mode main-menu */}
           {gameMode === 'main-menu' && (
             <button
@@ -114,25 +116,29 @@ const Header = () => {
             </button>
           )}
           
-          {/* Boutons de contrôle du jeu - affiché uniquement en mode jeu */}
+          {/* Boutons de contrôle du jeu - affiché uniquement en mode jeu avec layout optimisé */}
           {gameMode === 'playing' && gameState && (
             <>
               <button
                 onClick={handleRestart}
                 disabled={isLoadingWord}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-300
+                className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-300
                   ${isLoadingWord 
                     ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
                     : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+                title={buttonTexts.restart}
               >
-                {buttonTexts.restart}
+                <span className="hidden sm:inline">{buttonTexts.restart}</span>
+                <span className="sm:hidden">🔄</span>
               </button>
               
               <button
                 onClick={handleReturn}
-                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-300"
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-xs font-medium transition-colors duration-300"
+                title={buttonTexts.return}
               >
-                {buttonTexts.return}
+                <span className="hidden sm:inline">{buttonTexts.return}</span>
+                <span className="sm:hidden">🏠</span>
               </button>
             </>
           )}

@@ -4,6 +4,9 @@ import { cn } from "@/lib/utils";
 import Header from "@/components/header";
 import { GameProvider } from "@/contexts/GameContext";
 import ScrollToTop from "@/components/scroll-to-top";
+import { UseGoogleAnalysic } from "@/components/use-google-analysic";
+import { Footer } from "@/components/footer";
+import { DynamicLayout } from "@/components/dynamic-layout";
 
 
 export const metadata: Metadata = {
@@ -44,12 +47,10 @@ export default function RootLayout({
         )}
       >
         <GameProvider>
-          <div className="relative flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <ScrollToTop />
-          </div>
+          <DynamicLayout>{children}</DynamicLayout>
         </GameProvider>
+
+        <UseGoogleAnalysic />
       </body>
     </html>
   );
