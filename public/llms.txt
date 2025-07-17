@@ -1,0 +1,76 @@
+# Sutom: A Word Guessing Game
+
+## Game Overview
+
+Sutom is an engaging word guessing game inspired by Wordle, built with modern web technologies. Challenge your vocabulary and deduction skills as you attempt to guess the target word through strategic letter placement and pattern recognition.
+
+## Game Description
+
+Sutom offers an intellectually stimulating word puzzle experience where players must deduce a hidden word through a series of guesses. Each guess provides valuable feedback through color-coded hints, helping players narrow down the correct letters and their positions. The game features both a daily challenge mode with the same word for all players and a classic mode with customizable difficulty levels.
+
+### Key Features:
+
+- **Intuitive Gameplay**: Simple to learn, challenging to master
+- **Visual Feedback**: Color-coded letter states (green for correct position, yellow for correct letter but wrong position, gray for letters not in the word)
+- **Audio Feedback**: Distinctive sounds for different letter states and game outcomes
+- **Responsive Design**: Optimized for both desktop and mobile play
+- **Virtual Keyboard**: On-screen keyboard with AZERTY layout (French keyboard)
+- **Physical Keyboard Support**: Play using your device's keyboard
+- **Daily Challenges**: New word every day for all players
+- **Multiple Difficulty Levels**: Choose from various word lengths and complexity
+- **Custom Words**: Create custom games with your own words via URL parameters
+- **Game Statistics**: Track your performance and improvement over time
+
+## How to Play
+
+1. **Objective**: Guess the hidden word within a limited number of attempts
+2. **Starting Hint**: The first letter of the word is revealed as a starting clue
+3. **Making Guesses**: Enter a complete word of the same length as the target word
+4. **Feedback System**:
+   - **Green**: Letter is correct and in the right position
+   - **Yellow**: Letter is in the word but in the wrong position
+   - **Gray**: Letter is not in the word
+5. **Keyboard Status**: The virtual keyboard updates to show which letters you've tried and their status
+6. **Winning**: Successfully guess the complete word to win
+7. **Game Modes**:
+   - **Daily Challenge**: One word per day, same for all players
+   - **Classic Mode**: Choose difficulty level and play unlimited games
+
+## Game Modes
+
+### Daily Challenge
+- New word every day at midnight
+- Same word for all players worldwide
+- Compare your results with the community
+- Limited to one attempt per day
+- Countdown timer to the next challenge
+
+### Classic Mode
+- Choose from multiple difficulty levels:
+  - **Easy**: Shorter words (3-5 letters)
+  - **Medium**: Standard words (6-8 letters)
+  - **Hard**: Longer, more complex words (9+ letters)
+- Play unlimited games
+- Practice your word-guessing skills
+- Custom difficulty options
+
+## Technical Features
+
+- Built with Next.js 13+ and React
+- TypeScript for type safety
+- TailwindCSS for responsive design
+- Modern React Hooks for state management
+- Optimized for performance across devices
+- Clean, accessible user interface
+
+## Keywords
+
+word game, puzzle game, Wordle, Sutom, word guessing, daily challenge, vocabulary game, brain game, letter game, word deduction, language game, word puzzle, educational game, spelling game, word skills, mental exercise, daily word game, letter puzzle, word discovery, linguistic challenge
+
+## Play Now
+
+Visit our website to start playing Sutom and challenge your word-guessing skills today!
+
+---
+
+© 2024 Sutom Game. All rights reserved.
