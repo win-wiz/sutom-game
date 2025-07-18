@@ -66,13 +66,11 @@ const Header = () => {
             <Image 
               src={logo} 
               alt="logo" 
-              width={gameMode === 'playing' ? 24 : 32} 
-              height={gameMode === 'playing' ? 24 : 32} 
+              width={32} 
+              height={32} 
               className="opacity-90" 
             />
-            <span className={`font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent ${
-              gameMode === 'playing' ? 'text-lg' : 'text-2xl'
-            }`}>Sutom</span>
+            <span className={`font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent text-2xl`}>Sutom</span>
           </Link>
 
           {/* Informations du jeu - affiché uniquement en mode jeu avec layout optimisé */}
