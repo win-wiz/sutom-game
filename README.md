@@ -1,4 +1,4 @@
-# Sutom Game
+# Sutom Game [https://github.com/win-wiz/sutom-game]
 
 Un jeu de devinettes de mots construit avec T3 Stack, similaire à Wordle.
 

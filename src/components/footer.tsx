@@ -20,13 +20,18 @@ const NAVIGATION_LINKS = [
 const FRIEND_LINKS = [
   {
     href: 'https://wordless.online',
-    label: 'Lien ami 1',
+    label: 'Wordless',
     text: 'Wordless'
   },
   {
     href: 'https://emojis.click',
-    label: 'Lien ami 2',
+    label: 'EmojiClick',
     text: 'EmojiClick'
+  },
+  {
+    href: '"https://mergeek.com',
+    label: 'Mergeek',
+    text: 'Mergeek'
   }
 ] as const;
 
