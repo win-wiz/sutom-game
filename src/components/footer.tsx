@@ -19,6 +19,11 @@ const NAVIGATION_LINKS = [
 
 const FRIEND_LINKS = [
   {
+    href: 'https://newsinsimple.com/',
+    label: 'NewsInSimple',
+    external: true
+  },
+  {
     href: 'https://wordless.online',
     label: 'Wordless',
     text: 'Wordless'
