@@ -34,10 +34,40 @@ const FRIEND_LINKS = [
     text: 'EmojiClick'
   },
   {
-    href: '"https://mergeek.com',
-    label: 'Mergeek',
-    text: 'Mergeek'
-  }
+    href: 'https://8value.online',
+    label: '8Value',
+    external: true
+  },
+  {
+    href: 'https://newemojis.online',
+    label: 'NewEmojis',
+    external: true
+  },
+  {
+    href: 'https://pokemonteambuilders.online',
+    label: 'PokemonTeamBuilder',
+    external: true
+  },
+  {
+    href: 'https://sandboxels.online',
+    label: 'Sandboxels',
+    external: true
+  },
+  {
+    href: 'https://digibouquet.online',
+    label: 'Digibouquet',
+    external: true
+  },
+  {
+    href: 'https://2048cupcake.online',
+    label: '2048Cupcake',
+    external: true
+  },
+  {
+    href: 'https://minutecryptic.online',
+    label: 'MinuteCryptic',
+    external: true
+  },
 ] as const;
 
 // Optimisation: extraire le SVG GitHub en tant que constante pour éviter la re-création
