@@ -21,7 +21,7 @@ const FRIEND_LINKS = [
   {
     href: 'https://newsinsimple.com/',
     label: 'NewsInSimple',
-    external: true
+    text: 'NewsInSimple'
   },
   {
     href: 'https://wordless.online',
@@ -36,37 +36,37 @@ const FRIEND_LINKS = [
   {
     href: 'https://8value.online',
     label: '8Value',
-    external: true
+    text: '8Value'
   },
   {
     href: 'https://newemojis.online',
     label: 'NewEmojis',
-    external: true
+    text: 'NewEmojis'
   },
   {
     href: 'https://pokemonteambuilders.online',
     label: 'PokemonTeamBuilder',
-    external: true
+    text: 'PokemonTeamBuilder'
   },
   {
     href: 'https://sandboxels.online',
     label: 'Sandboxels',
-    external: true
+    text: 'Sandboxels'
   },
   {
     href: 'https://digibouquet.online',
     label: 'Digibouquet',
-    external: true
+    text: 'Digibouquet'
   },
   {
     href: 'https://2048cupcake.online',
     label: '2048Cupcake',
-    external: true
+    text: '2048Cupcake'
   },
   {
     href: 'https://minutecryptic.online',
     label: 'MinuteCryptic',
-    external: true
+    text: 'MinuteCryptic'
   },
 ] as const;
 
